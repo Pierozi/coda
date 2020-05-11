@@ -1,7 +1,7 @@
 [%%define ledger_depth 14]
 [%%import "/src/config/curve/medium.mlh"]
 [%%import "/src/config/coinbase/realistic.mlh"]
-[%%import "/src/config/scan_state/point2tps.mlh"]
+[%%import "/src/config/scan_state/medium.mlh"]
 [%%import "/src/config/debug_level/some.mlh"]
 [%%import "/src/config/proof_level/full.mlh"]
 [%%import "/src/config/txpool_size.mlh"]
@@ -22,7 +22,7 @@
 
 [%%define genesis_ledger "testnet_postake"]
 
-[%%define genesis_state_timestamp "2020-05-09 14:00:00-07:00"]
+[%%define genesis_state_timestamp "2020-05-11 12:20:00-07:00"]
 [%%define block_window_duration 180000]
 
 [%%define integration_tests false]
