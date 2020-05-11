@@ -65,7 +65,8 @@ type t =
       Protocol_states_for_root_scan_state.t
   ; consensus_local_state: Consensus.Data.Local_state.t
   ; max_length: int
-  ; genesis_constants: Genesis_constants.t }
+  ; genesis_constants: Genesis_constants.t
+  ; constraint_constants: Genesis_constants.Constraint_constants.t }
 
 let consensus_local_state {consensus_local_state; _} = consensus_local_state
 
@@ -105,7 +106,7 @@ let close t =
        (Breadcrumb.mask (root t)))
 
 let create ~logger ~root_data ~root_ledger ~base_hash ~consensus_local_state
-    ~max_length ~genesis_constants =
+    ~max_length ~constraint_constants ~genesis_constants =
   let open Root_data in
   let root_hash =
     External_transition.Validated.state_hash root_data.transition
@@ -145,6 +146,7 @@ let create ~logger ~root_data ~root_ledger ~base_hash ~consensus_local_state
     ; consensus_local_state
     ; max_length
     ; genesis_constants
+    ; constraint_constants
     ; protocol_states_for_root_scan_state }
   in
   t
@@ -400,7 +402,10 @@ let move_root t ~new_root_hash ~new_root_protocol_states ~garbage
     if Breadcrumb.just_emitted_a_proof new_root_node.breadcrumb then (
       let s = t.root_ledger in
       (* STEP 4 *)
-      let mt = Ledger.Maskable.register_mask s (Ledger.Mask.create ()) in
+      let mt =
+        Ledger.Maskable.register_mask s
+          (Ledger.Mask.create ~depth:(Ledger.Any_ledger.M.depth s) ())
+      in
       (* STEP 5 *)
       Non_empty_list.iter
         (Option.value_exn
@@ -567,7 +572,8 @@ let apply_diffs t diffs ~ignore_consensus_local_state =
     "Applying %d diffs to full frontier (%s --> ?)" (List.length diffs)
     (Frontier_hash.to_string t.hash) ;
   let consensus_constants =
-    Consensus.Constants.create ~protocol_constants:t.genesis_constants.protocol
+    Consensus.Constants.create ~constraint_constants:t.constraint_constants
+      ~protocol_constants:t.genesis_constants.protocol
   in
   let local_state_was_synced_at_start =
     Consensus.Hooks.required_local_state_sync ~constants:consensus_constants
